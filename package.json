@@ -1,0 +1,52 @@
+{
+  "name": "reviewme",
+  "version": "1.0.0",
+  "description": "Google Play and App Store reviews posted to Slack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bin/start.js"
+  },
+  "bin": {
+    "reviewme": "bin/reviewme-exec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TradeMe/ReviewMe.git"
+  },
+  "keywords": [
+    "android",
+    "ios",
+    "google",
+    "play",
+    "app",
+    "store",
+    "slack",
+    "app",
+    "reviews",
+    "reviews"
+  ],
+  "author": "Josh Burton <josh.burton@trademe.co.nz>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TradeMe/ReviewMe/issues"
+  },
+  "homepage": "https://github.com/TradeMe/ReviewMe#readme",
+  "devDependencies": {
+    "chai": "3.5.0",
+    "co-mocha": "1.1.2",
+    "forever": "^0.15.3",
+    "mocha": "2.5.3",
+    "sinon": "1.17.4",
+    "sinon-chai": "2.8.0"
+  },
+  "dependencies": {
+    "cheerio": "~0.22.0",
+    "commander": "^2.11.0",
+    "feedsub": "^0.4.0",
+    "google-play-scraper": "^3.3.1",
+    "googleapis": "^20.1.0",
+    "moment": "^2.18.1",
+    "request": "~2.67.0"
+  }
+}
