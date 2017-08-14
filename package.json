@@ -8,7 +8,7 @@
     "start": "node bin/start.js"
   },
   "bin": {
-    "reviewme": "bin/reviewme-exec.js"
+    "reviewme": "bin/reviewme.js"
   },
   "repository": {
     "type": "git",
