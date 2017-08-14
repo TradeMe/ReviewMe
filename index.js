@@ -9,7 +9,7 @@ module.exports.start = function start(config) {
             slackHook: config.slackHook,
             appId: app.appId,
             publisherKey: app.publisherKey,
-            debug: config.verbose,
+            verbose: config.verbose,
             dryRun: config.dryRun,
             botUsername: config.botUsername
         })

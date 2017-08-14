@@ -63,14 +63,24 @@ exports.handleFetchedGooglePlayReviews = function (config, appInformation, revie
 
 
 exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
-    console.log("INFO: Fetching Google Play reviews for " + config.appId);
+    if (config.verbose) console.log("INFO: Fetching Google Play reviews for " + config.appId);
 
     const scopes = ['https://www.googleapis.com/auth/androidpublisher'];
 
     //read publisher json key
-    const publisherJson = JSON.parse(require('fs').readFileSync(config.publisherKey, 'utf8'));
+    var publisherJson;
+    try {
+        publisherJson = JSON.parse(require('fs').readFileSync(config.publisherKey, 'utf8'));
+    } catch (e) {
+        console.warn(e)
+    }
 
-    const jwt = new google.auth.JWT(publisherJson.client_id, null, publisherJson.private_key, scopes, null);
+    var jwt;
+    try {
+        jwt = new google.auth.JWT(publisherJson.client_id, null, publisherJson.private_key, scopes, null);
+    } catch (e) {
+        console.warn(e)
+    }
 
     jwt.authorize(function (err, tokens) {
         if (err) {
