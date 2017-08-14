@@ -69,7 +69,11 @@ exports.welcomeMessage = function (config, appInformation) {
 
 exports.postToSlack = function (message, config) {
     var messageJSON = JSON.stringify(message);
-    if (config.verbose) console.log("INFO: Posting new message to Slack: " + messageJSON);
+    if (config.verbose) {
+        console.log("INFO: Posting new message to Slack: ");
+        console.log("INFO: Hook: " + config.slackHook);
+        console.log("INFO: Message: " + messageJSON);
+    }
     return request.post({
         url: config.slackHook,
         headers: {
