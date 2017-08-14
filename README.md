@@ -2,7 +2,10 @@
 
 ReviewMe is a nodejs app that monitors App Store and Google Play reviews, and posts them to Slack.
 
+![ReviewMe Preview](images/reviewme-preview.png)
+
 This project was originally forked from [reviews-to-slack](https://www.npmjs.com/package/reviews-to-slack)
+
 
 ## Installation
 
@@ -22,6 +25,7 @@ ReviewMe requires a config file. A simple config looks something like:
   "verbose": true,
   "dryRun": false,
   "botUsername": "ReviewMe",
+  "interval":300,
   "apps": [
     {
       "appId": "com.myandroidapp",
@@ -38,6 +42,7 @@ ReviewMe requires a config file. A simple config looks something like:
 * **verbose**: When enabled, log messages will be printed to the console
 * **dryRun**: When enabled, ReviewMe will post the latest app review for each app on startup. Useful for debugging
 * **botUsername** The username of the Slack bot
+* **interval** The interval (in millseconds) to check for new reviews
 * **apps** A list of apps to fetch reviews for
 * **appId** The Android app package name, or the iOS app ID.
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.

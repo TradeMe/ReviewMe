@@ -5,6 +5,7 @@ module.exports.start = function start(config) {
         var app = config.apps[i];
 
         reviews.start({
+            interval: config.interval,
             slackHook: config.slackHook,
             appId: app.appId,
             publisherKey: app.publisherKey,
