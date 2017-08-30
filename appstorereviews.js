@@ -31,7 +31,6 @@ function startReviewForRegion(config, region) {
 
     //interval must be in minutes for feedsub
     var interval = (config.interval + interval_multiplier) / 60;
-    console.log("interval: " + interval);
 
     var reader = new FeedSub(config.feed, {
         emitOnStart: true
