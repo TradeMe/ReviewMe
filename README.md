@@ -32,7 +32,11 @@ ReviewMe requires a config file. A simple config looks something like:
       "publisherKey": "~/publisher.json"
     },
     {
-      "appId": "012345678"
+      "appId": "012345678",
+      "regions": [
+              "nz",
+              "us",
+      ]
     }
   ]
 }
@@ -43,9 +47,13 @@ ReviewMe requires a config file. A simple config looks something like:
 * **dryRun**: When enabled, ReviewMe will post the latest app review for each app on startup. Useful for debugging
 * **botUsername** The username of the Slack bot
 * **interval** The interval (in millseconds) to check for new reviews
-* **apps** A list of apps to fetch reviews for
-* **appId** The Android app package name, or the iOS app ID.
+* **apps** A list of apps to fetch reviews for. See App Options below
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.
+
+### App options
+
+* **appId** The Android app package name, or the iOS app ID.
+* **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for
 
 
 ## Google Play Publisher Key

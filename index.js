@@ -8,6 +8,7 @@ module.exports.start = function start(config) {
             interval: config.interval,
             slackHook: config.slackHook,
             appId: app.appId,
+            regions: app.regions,
             publisherKey: app.publisherKey,
             verbose: config.verbose,
             dryRun: config.dryRun,

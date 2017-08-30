@@ -3,17 +3,35 @@ var FeedSub = require('feedsub');
 require('./constants');
 
 exports.startReview = function (config) {
-    var appInformation = {};
-    var firstRun = true;
 
-    if (!config.region) {
-        config.region = "us";
+    if (!config.regions) {
+        config.regions = ["us"];
     }
 
-    config.feed = "https://itunes.apple.com/" + config.region + "/rss/customerreviews/id=" + config.appId + "/sortBy=mostRecent/xml";
+    if (!config.interval) {
+        config.interval = DEFAULT_INTERVAL_SECONDS
+    }
+
+    for (var i = 0; i < config.regions.length; i++) {
+        const region = config.regions[i];
+        startReviewForRegion(config, region)
+    }
+};
+
+function startReviewForRegion(config, region) {
+    var appInformation = {};
+    appInformation.region = region.toUpperCase();
+    var firstRun = true;
+
+    config.feed = "https://itunes.apple.com/" + region + "/rss/customerreviews/id=" + config.appId + "/sortBy=mostRecent/xml";
+
+    //add a multiple to each regions interval to prevent spamming the server
+    const regionIndex = config.regions.indexOf(region);
+    const interval_multiplier = regionIndex * 60;
 
     //interval must be in minutes for feedsub
-    var interval = (config.interval != null ? config.interval : DEFAULT_INTERVAL_SECONDS) / 60;
+    var interval = (config.interval + interval_multiplier) / 60;
+    console.log("interval: " + interval);
 
     var reader = new FeedSub(config.feed, {
         emitOnStart: true
@@ -22,7 +40,7 @@ exports.startReview = function (config) {
     reader.on('items', function (entries) {
         if (firstRun) {
             firstRun = false
-            if (entries == null || entries.length == 0) return console.log("WARNING: No reviews found for " + config.appId);
+            if (entries == null || entries.length == 0) return console.log("WARNING: No reviews found for " + config.appId + " (" + region + ")");
 
             var reviewLength = entries.length;
 
@@ -50,9 +68,10 @@ exports.startReview = function (config) {
     });
 
     reader.readInterval(function (error, entries) {
-        console.log("INFO: Fetched App Store reviews for " + config.appId);
+        console.log("INFO: Fetched App Store reviews for " + config.appId + " (" + region + ")");
     }, interval, true);
-};
+}
+
 
 function onItemsReceived(config, appInformation, items) {
     for (var i = 0; i < items; i++) {
@@ -162,9 +181,9 @@ var slackMessage = function (review, config, appInformation) {
     }
 
     if (review.link) {
-        footer += " - " + "<" + review.link + "|" + appInformation.appName + ", " + review.storeName + ">";
+        footer += " - " + "<" + review.link + "|" + appInformation.appName + ", " + review.storeName + " (" + appInformation.region + ") >";
     } else {
-        footer += " - " + appInformation.appName + ", " + review.storeName;
+        footer += " - " + appInformation.appName + ", " + review.storeName + " (" + appInformation.region + ")";
     }
 
     var title = stars;
