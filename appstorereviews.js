@@ -34,10 +34,10 @@ exports.startReview = function (config) {
             var interval_seconds = config.interval + (i * 10);
 
             setInterval(function (config, appInformation) {
-                if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching Google Play reviews");
+                if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
 
-                exports.fetchAppStoreReviews(config, region, appInformation, function (reviews) {
-                    exports.handleFetchedAppStoreReviews(config, region, appInformation, reviews);
+                exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
+                    exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
                 });
             }, interval_seconds * 1000, config, appInformation);
         });
@@ -48,25 +48,25 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
     const url = "https://itunes.apple.com/" + appInformation.region + "/rss/customerreviews/id=" + config.appId + "/sortBy=mostRecent/json";
 
     request(url, function (error, response, body) {
-        var rss = JSON.parse(body);
-        var entries = rss.feed.entry;
-
         if (error) {
             if (config.verbose) {
-                console.log("ERROR: [" + config.appId + "] Error fetching reviews from App Store");
+                if (config.verbose) console.log("ERROR: Error fetching reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
                 console.log(error)
             }
             callback([]);
             return;
         }
 
+        var rss = JSON.parse(body);
+        var entries = rss.feed.entry;
+
         if (!entries) {
-            if (config.verbose) console.log("INFO: [" + config.appId + "] Received no reviews from App Store");
+            if (config.verbose) console.log("INFO: Received no reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
             callback([]);
             return;
         }
 
-        if (config.verbose) console.log("INFO: [" + config.appId + "] Received reviews from App Store");
+        if (config.verbose) console.log("INFO: Received reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
 
         updateAppInformation(config, entries, appInformation);
 
