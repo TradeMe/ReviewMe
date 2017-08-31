@@ -54,7 +54,7 @@ function publishReview(appInformation, config, review, force) {
 }
 
 exports.handleFetchedGooglePlayReviews = function (config, appInformation, reviews) {
-    if (config.verbose) console.log("INFO: [" + config.appId + "] Handing fetched reviews");
+    if (config.verbose) console.log("INFO: [" + config.appId + "] Handling fetched reviews");
     for (var n = 0; n < reviews.length; n++) {
         var review = reviews[n];
         publishReview(appInformation, config, review, false)

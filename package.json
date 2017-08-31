@@ -43,7 +43,6 @@
   "dependencies": {
     "cheerio": "~0.22.0",
     "commander": "^2.11.0",
-    "feedsub": "^0.4.0",
     "google-play-scraper": "^3.3.1",
     "googleapis": "^20.1.0",
     "moment": "^2.18.1",
