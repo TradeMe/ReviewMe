@@ -1,5 +1,5 @@
 {
-  "name": "reviewme",
+  "name": "@trademe/reviewme",
   "version": "1.0.0",
   "description": "Google Play and App Store reviews posted to Slack",
   "main": "index.js",

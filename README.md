@@ -9,7 +9,7 @@ This project was originally forked from [reviews-to-slack](https://www.npmjs.com
 
 ## Installation
 
-`npm install -g reviewme`
+`npm install -g @trademe/reviewme`
 
 ## Usage
 
