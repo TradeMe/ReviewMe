@@ -1,6 +1,6 @@
 {
   "name": "@trademe/reviewme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Google Play and App Store reviews posted to Slack",
   "main": "index.js",
   "scripts": {
