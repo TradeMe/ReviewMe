@@ -57,7 +57,17 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
             return;
         }
 
-        var rss = JSON.parse(body);
+        var rss;
+        try {
+            rss = JSON.parse(body);
+        } catch(e) {
+            console.error("Error parsing app store reviews");
+            console.error(e);
+
+            callback([]);
+            return;
+        }
+
         var entries = rss.feed.entry;
 
         if (entries == null || !entries.size > 0) {

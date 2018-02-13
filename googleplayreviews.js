@@ -113,7 +113,11 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
                 out.version = comment.appVersionName;
                 out.versionCode = comment.appVersionCode;
                 out.osVersion = comment.androidOsVersion;
-                out.device = comment.deviceMetadata.productName;
+
+                if (comment.deviceMetadata) {
+                    out.device = comment.deviceMetadata.productName;
+                }
+
                 out.text = comment.text;
                 out.rating = comment.starRating;
                 out.link = 'https://play.google.com/store/apps/details?id=' + config.appId + '&reviewId=' + review.reviewId;
