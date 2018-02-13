@@ -70,7 +70,7 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
 
         var entries = rss.feed.entry;
 
-        if (entries == null || !entries.size > 0) {
+        if (entries == null || !entries.length > 0) {
             if (config.verbose) console.log("INFO: Received no reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
             callback([]);
             return;
