@@ -1,6 +1,6 @@
 {
   "name": "@trademe/reviewme",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Google Play and App Store reviews posted to Slack",
   "main": "index.js",
   "scripts": {
@@ -42,10 +42,11 @@
   },
   "dependencies": {
     "cheerio": "~0.22.0",
-    "commander": "^2.11.0",
+    "commander": "^2.14.1",
     "google-play-scraper": "^3.3.1",
-    "googleapis": "^20.1.0",
-    "moment": "^2.18.1",
+    "googleapis": "^20.2.0",
+    "moment": "^2.20.1",
+    "npm": "^5.6.0",
     "request": "~2.67.0"
   }
 }
