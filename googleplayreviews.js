@@ -1,6 +1,7 @@
 const controller = require('./reviews');
 var google = require('googleapis');
 var playScraper = require('google-play-scraper');
+var androidVersions = require('android-versions')
 
 exports.startReview = function (config) {
     var appInformation = {};
@@ -13,7 +14,7 @@ exports.startReview = function (config) {
             }
 
             appInformation.appName = appData.title;
-            appInformation.appIcon = 'https:' + appData.icon;
+            appInformation.appIcon = appData.icon;
 
             exports.fetchGooglePlayReviews(config, appInformation, function (entries) {
                 var reviewLength = entries.length;
@@ -172,6 +173,7 @@ var slackMessage = function (review, config, appInformation) {
     return {
         "username": config.botUsername,
         "icon_url": config.botIcon,
+        "icon_emoji": config.botEmoji,
         "channel": config.channel,
         "attachments": [
             {
@@ -180,7 +182,7 @@ var slackMessage = function (review, config, appInformation) {
                 "color": color,
                 "author_name": review.author,
 
-                "thumb_url": appInformation.appIcon,
+                "thumb_url": config.showAppIcon ? appInformation.appIcon : null,
 
                 "title": title,
 
@@ -192,59 +194,10 @@ var slackMessage = function (review, config, appInformation) {
 };
 
 var getVersionNameForCode = function (versionCode) {
-    if (versionCode == 14) {
-        return "4.0"
+    var version = androidVersions.get(versionCode);
+    if (version != null) {
+        return version.semver;
     }
 
-    if (versionCode == 15) {
-        return "4.0.3"
-    }
-
-    if (versionCode == 16) {
-        return "4.1"
-    }
-
-    if (versionCode == 17) {
-        return "4.2"
-    }
-
-    if (versionCode == 18) {
-        return "4.3"
-    }
-
-    if (versionCode == 19) {
-        return "4.4"
-    }
-
-    if (versionCode == 20) {
-        return "4.4W"
-    }
-
-    if (versionCode == 21) {
-        return "5.0"
-    }
-
-    if (versionCode == 22) {
-        return "5.1"
-    }
-
-    if (versionCode == 22) {
-        return "5.1"
-    }
-
-    if (versionCode == 23) {
-        return "6.0"
-    }
-
-    if (versionCode == 24) {
-        return "7.0"
-    }
-
-    if (versionCode == 25) {
-        return "7.1"
-    }
-
-    if (versionCode == 26) {
-        return "8.0"
-    }
+    return "";
 };

@@ -198,6 +198,7 @@ var slackMessage = function (review, config, appInformation) {
     return {
         "username": config.botUsername,
         "icon_url": config.botIcon,
+        "icon_emoji": config.botEmoji,
         "channel": config.channel,
         "attachments": [
             {
@@ -205,7 +206,7 @@ var slackMessage = function (review, config, appInformation) {
                 "color": color,
                 "author_name": review.author,
 
-                "thumb_url": review.appIcon ? review.appIcon : appInformation.appIcon,
+                "thumb_url": config.showAppIcon ? (review.appIcon ? review.appIcon : appInformation.appIcon) : null,
 
                 "title": title,
                 "text": text,

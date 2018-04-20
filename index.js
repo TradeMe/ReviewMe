@@ -12,7 +12,9 @@ module.exports.start = function start(config) {
             publisherKey: app.publisherKey,
             verbose: config.verbose,
             dryRun: config.dryRun,
-            botUsername: config.botUsername
+            botUsername: app.botUsername || config.botUsername,
+            botEmoji: app.botEmoji || config.botEmoji,
+            channel: app.channel || config.channel
         })
     }
 };
