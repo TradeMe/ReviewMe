@@ -1,5 +1,7 @@
 # ReviewMe
 
+![NPM Version](https://img.shields.io/npm/v/@trademe/reviewme.svg) ![Downloads](https://img.shields.io/npm/dt/@trademe/reviewme.svg)  
+
 ReviewMe is a nodejs app that monitors App Store and Google Play reviews, and posts them to Slack.
 
 ![ReviewMe Preview](images/reviewme-preview.png)
