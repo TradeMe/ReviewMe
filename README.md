@@ -46,6 +46,9 @@ ReviewMe requires a config file. A simple config looks something like:
 * **verbose**: When enabled, log messages will be printed to the console
 * **dryRun**: When enabled, ReviewMe will post the latest app review for each app on startup. Useful for debugging
 * **botUsername** The username of the Slack bot
+* **botIcon** An image url to use for the bot avatar
+* **botEmoji** A slack emoji to use for the bot avatar, e.g. `:apple:`
+* **showAppIcon** Determines if app icon will be displayed
 * **interval** The interval (in millseconds) to check for new reviews
 * **apps** A list of apps to fetch reviews for. See App Options below
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.
