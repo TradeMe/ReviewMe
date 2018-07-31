@@ -28,6 +28,19 @@ ReviewMe requires a config file. A simple config looks something like:
   "dryRun": false,
   "botUsername": "ReviewMe",
   "interval":300,
+  "notifyEmails":false,
+  "mailOptions:{
+    "service":'gmail',
+    "user":'reviewme@gmail.com',
+    "pass":'yourpassword',
+    "from":'youremail@gmail.com',
+    "subject":'App Review',
+    emails:[
+      "youremailone@gmail.com",
+      "youremailtwo@gmail.com"
+    ]
+
+  },
   "apps": [
     {
       "appId": "com.myandroidapp",
