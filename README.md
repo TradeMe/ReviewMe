@@ -76,7 +76,7 @@ ReviewMe requires a config file. A simple config looks something like:
 * **appId** The Android app package name, or the iOS app ID.
 * **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for
 
-## Email Options
+### Email Options
 * **transporter** A [nodemailer](https://nodemailer.com/about/) transporter object
 * **recipientList** An array containing the email addresses that should receive new reviews
 
