@@ -1,0 +1,49 @@
+<% if(appInformation.appIcon){ %>
+    <img src="<%= appInformation.appIcon %>" alt="appIcon" width="100" length="100">
+<%}%>
+
+<h1>You've received a new review for <%= appInformation.appName %></h1>
+
+<p>
+    <b>Platform: </b> <%= review.storeName %>
+</p>
+<p>
+    <b>Author: </b> <%= review.author %>
+</p>
+<p>
+    <b>Rating: </b> <%= review.stars %> 
+</p>
+<p>
+    <b>Comment: </b> 
+    <% if(review.title){ %>
+        <h3><%= review.title %></h3>
+    <%}%>
+    <%= review.text %>
+</p>
+
+<% if(review.version || review.versionCode || review.device || review.osVersion){ %>
+    <p>
+        <b>Metadata: </b>
+
+        <% if(review.version){ %>
+            <i>Version:</i> <%= review.version %> <br>
+        <%}%>
+
+        <% if(review.versionCode){ %>
+            <i>Version code:</i> <%= review.versionCode %> <br>
+        <%}%>
+
+        <% if(review.osVersion){ %>
+            <i>OS Version:</i> <%= review.osVersion %> <br>
+        <%}%>
+
+        <% if(review.device){ %>
+            <i>Device:</i> <%= review.device %> <br>
+        <%}%>
+
+    </p>
+<%}%>
+
+<% if(review.link){ %>
+    <a href="<%= review.link %>">Go to review</a>
+<%}%>

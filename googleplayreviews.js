@@ -1,4 +1,5 @@
 const controller = require('./reviews');
+const ejs = require('ejs');
 var google = require('googleapis');
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
@@ -48,6 +49,11 @@ function publishReview(appInformation, config, review, force) {
         if (config.verbose) console.log("INFO: Received new review: " + review);
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+        if(config.sendByEmail){
+            email(review, config, appInformation, function(data){
+                controller.sendEmails(data, config);
+            });
+        }
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
@@ -133,13 +139,18 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
     });
 };
 
+function getStars(rating){
+    var stars = "";
+    for (var i = 0; i < 5; i++) {
+        stars += i < rating ? "★" : "☆";
+    }
+    return stars;
+}
+
 var slackMessage = function (review, config, appInformation) {
     if (config.verbose) console.log("INFO: Creating message for review " + review.title);
 
-    var stars = "";
-    for (var i = 0; i < 5; i++) {
-        stars += i < review.rating ? "★" : "☆";
-    }
+    var stars = getStars(review.rating);
 
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
@@ -192,6 +203,23 @@ var slackMessage = function (review, config, appInformation) {
         ]
     };
 };
+
+// Build the html body and the subject of the email
+var email = function(review, config, appInformation, cb){
+    review.stars = getStars(review.rating);
+    let data = {review: review, appInformation: appInformation};
+
+    ejs.renderFile('./views/review-email.ejs', data, function(err, htmlStr){
+        if(err){
+            if(config.verbose)  console.error("ejs templating error: " + err);
+            return;
+        }
+        cb({
+            subject: 'New review on ' + review.storeName,
+            html: htmlStr
+        });
+    });
+}
 
 var getVersionNameForCode = function (versionCode) {
     var version = androidVersions.get(versionCode);
