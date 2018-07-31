@@ -88,7 +88,7 @@ exports.postToSlack = function (message, config) {
 exports.sendEmails = function(mailOptions, config){
         let transporter = nodemailer.createTransport(config.emailOptions.transporter);
 
-        mailOptions.to = recipientList(config.emailOptions.recipientList);
+        mailOptions.to = config.emailOptions.recipientList.join(', ');
         mailOptions.from = '"' + (config.emailOptions.senderName || "ReviewMe") + '"' 
             + " <" + config.emailOptions.from + ">";
         
@@ -101,16 +101,6 @@ exports.sendEmails = function(mailOptions, config){
             }
             console.log('INFO: email sent: %s', info.messageId);    
         });
-}
-
-// transform email into comma separated email addresses
-function recipientList(emails){
-    var recipients = "";
-    for(let i = 0; i < emails.length; i++){
-        recipients += emails[i];
-        if(i != emails.length - 1) recipients += ', ';
-    }
-    return recipients;
 }
 
 var appStoreName = function (config) {
