@@ -14,7 +14,9 @@ module.exports.start = function start(config) {
             dryRun: config.dryRun,
             botUsername: app.botUsername || config.botUsername,
             botEmoji: app.botEmoji || config.botEmoji,
-            channel: app.channel || config.channel
+            channel: app.channel || config.channel,
+            notifyEmails: config.notifyEmails,
+            mailOptions: config.mailOptions
         })
     }
 };
