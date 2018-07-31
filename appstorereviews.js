@@ -60,7 +60,7 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
         var rss;
         try {
             rss = JSON.parse(body);
-        } catch(e) {
+        } catch (e) {
             console.error("Error parsing app store reviews");
             console.error(e);
 
@@ -100,6 +100,8 @@ exports.handleFetchedAppStoreReviews = function (config, appInformation, reviews
         var review = reviews[n];
         publishReview(appInformation, config, review, false)
     }
+    if (config.notifyEmails)
+        controller.sendToEmails(getReviewsToNotifyByEmail(), config, appInformation);
 };
 
 exports.parseAppStoreReview = function (rssItem, config, appInformation) {
@@ -122,6 +124,8 @@ function publishReview(appInformation, config, review, force) {
         if (config.verbose) console.log("INFO: Received new review: " + JSON.stringify(review));
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+        if (config.notifyEmails)
+            controller.saveReviewToNotifyByEmail(review);
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
@@ -168,33 +172,8 @@ var isAppInformationEntry = function (entry) {
 
 var slackMessage = function (review, config, appInformation) {
     if (config.verbose) console.log("INFO: Creating message for review " + review.title);
-
-    var stars = "";
-    for (var i = 0; i < 5; i++) {
-        stars += i < review.rating ? "★" : "☆";
-    }
-
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
-
-    var text = "";
-    text += review.text + "\n";
-
-    var footer = "";
-    if (review.version) {
-        footer += " for v" + review.version;
-    }
-
-    if (review.link) {
-        footer += " - " + "<" + review.link + "|" + appInformation.appName + ", " + review.storeName + " (" + appInformation.region + ") >";
-    } else {
-        footer += " - " + appInformation.appName + ", " + review.storeName + " (" + appInformation.region + ")";
-    }
-
-    var title = stars;
-    if (review.title) {
-        title += " – " + review.title;
-    }
-
+    var { title, text, footer } = stringfyReview(review, appInformation);
     return {
         "username": config.botUsername,
         "icon_url": config.botIcon,
@@ -215,3 +194,34 @@ var slackMessage = function (review, config, appInformation) {
         ]
     };
 };
+
+var stringfyReview = function (review, appInformation) {
+
+    var stars = "";
+    for (var i = 0; i < 5; i++) {
+        stars += i < review.rating ? "★" : "☆";
+    }
+
+
+    var text = "";
+    text += review.text + "\n";
+
+    var footer = "";
+    if (review.version) {
+        footer += " for v" + review.version;
+    }
+
+    if (review.link) {
+        footer += " - " + "<" + review.link + "|" + appInformation.appName + ", " + review.storeName + " (" + appInformation.region + ") >";
+    } else {
+        footer += " - " + appInformation.appName + ", " + review.storeName + " (" + appInformation.region + ")";
+    }
+
+    var title = stars;
+    if (review.title) {
+        title += " – " + review.title;
+    }
+
+
+    return { title, text, footer };
+}

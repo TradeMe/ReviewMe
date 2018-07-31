@@ -7,7 +7,7 @@ exports.startReview = function (config) {
     var appInformation = {};
 
     //scrape Google Play for app information first
-    playScraper.app({appId: config.appId})
+    playScraper.app({ appId: config.appId })
         .then(function (appData, error) {
             if (error) {
                 return console.error("ERROR: [" + config.appId + "] Could not scrape Google Play, " + error);
@@ -48,6 +48,8 @@ function publishReview(appInformation, config, review, force) {
         if (config.verbose) console.log("INFO: Received new review: " + review);
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+        if (config.notifyEmails)
+            controller.saveReviewToNotifyByEmail(review);
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
@@ -60,6 +62,8 @@ exports.handleFetchedGooglePlayReviews = function (config, appInformation, revie
         var review = reviews[n];
         publishReview(appInformation, config, review, false)
     }
+    if (config.notifyEmails)
+        controller.sendToEmails(getReviewsToNotifyByEmail(), config, appInformation);
 };
 
 
@@ -135,13 +139,36 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
 
 var slackMessage = function (review, config, appInformation) {
     if (config.verbose) console.log("INFO: Creating message for review " + review.title);
+    var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
+    var { title, text, footer } = stringfyReview(review, appInformation);
+    return {
+        "username": config.botUsername,
+        "icon_url": config.botIcon,
+        "icon_emoji": config.botEmoji,
+        "channel": config.channel,
+        "attachments": [
+            {
+                "mrkdwn_in": ["text", "pretext", "title", "footer"],
 
+                "color": color,
+                "author_name": review.author,
+
+                "thumb_url": config.showAppIcon ? appInformation.appIcon : null,
+
+                "title": title,
+
+                "text": text,
+                "footer": footer
+            }
+        ]
+    };
+};
+var stringfyReview = function (review, appInformation) {
     var stars = "";
     for (var i = 0; i < 5; i++) {
         stars += i < review.rating ? "★" : "☆";
     }
 
-    var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
     var text = "";
     text += review.text + "\n";
@@ -169,30 +196,8 @@ var slackMessage = function (review, config, appInformation) {
     if (review.title) {
         title = title + " – " + review.title;
     }
-
-    return {
-        "username": config.botUsername,
-        "icon_url": config.botIcon,
-        "icon_emoji": config.botEmoji,
-        "channel": config.channel,
-        "attachments": [
-            {
-                "mrkdwn_in": ["text", "pretext", "title", "footer"],
-
-                "color": color,
-                "author_name": review.author,
-
-                "thumb_url": config.showAppIcon ? appInformation.appIcon : null,
-
-                "title": title,
-
-                "text": text,
-                "footer": footer
-            }
-        ]
-    };
-};
-
+    return { title, text, footer };
+}
 var getVersionNameForCode = function (versionCode) {
     var version = androidVersions.get(versionCode);
     if (version != null) {

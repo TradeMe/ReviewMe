@@ -1,6 +1,7 @@
 const request = require('request');
 const appstore = require('./appstorereviews.js');
 const googlePlay = require('./googleplayreviews.js');
+const nodemailer = require('nodemailer');
 
 const REVIEWS_STORES = {
     "APP_STORE": "app-store",
@@ -8,6 +9,7 @@ const REVIEWS_STORES = {
 };
 
 var published_reviews = [];
+var emails_reviews = [];
 
 (function () {
     exports.start = function start(config) {
@@ -82,8 +84,54 @@ exports.postToSlack = function (message, config) {
         body: messageJSON
     });
 };
-
-
+exports.saveReviewToNotifyByEmail = function (review) {
+    emails_reviews.push(review);
+}
+exports.getReviewsToNotifyByEmail = function () {
+    return emails_reviews;
+}
+exports.resetEmailsReviews = function () {
+    return emails_reviews = [];
+};
+exports.sendToEmails = function (reviews, config, appInformation) {
+    if (reviews.length == 0) return;
+    var message = emailMessage(reviews, appInformation);
+    var emails = config.mailOptions.emails;
+    var transporter = nodemailer.createTransport({
+        service: config.mailOptions.service,
+        auth: {
+            user: config.mailOptions.user,
+            pass: config.mailOptions.pass
+        }
+    });
+    if (config.verbose) {
+        console.log("INFO: Sending new message to Emails: ");
+        console.log("INFO: Emails: " + emails.join());
+    }
+    var mailOptions = {
+        from: config.mailOptions.from,
+        to: emails.join(),
+        subject: config.mailOptions.subject,
+        text: message
+    };
+    return transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+            resetEmailsReviews();
+        }
+    });
+};
+exports.emailMessage = function (reviews, appInformation) {
+    var message = "";
+    for (var n = 0; n < reviews.length; n++) {
+        var review = reviews[n];
+        var { title, text, footer } = stringfyReview(review, appInformation);
+        message += `Review #${n + 1} - ${title} \n${text}\n${footer}\n`;
+    }
+    return message;
+}
 var appStoreName = function (config) {
     return config.store === REVIEWS_STORES.APP_STORE ? "App Store" : "Google Play";
 };
