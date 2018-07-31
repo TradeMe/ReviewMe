@@ -101,7 +101,7 @@ exports.handleFetchedAppStoreReviews = function (config, appInformation, reviews
         publishReview(appInformation, config, review, false)
     }
     if (config.notifyEmails)
-        controller.sendToEmails(reviews, config, appInformation);
+        controller.sendToEmails(getReviewsToNotifyByEmail(), config, appInformation);
 };
 
 exports.parseAppStoreReview = function (rssItem, config, appInformation) {
@@ -124,6 +124,8 @@ function publishReview(appInformation, config, review, force) {
         if (config.verbose) console.log("INFO: Received new review: " + JSON.stringify(review));
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+        if (config.notifyEmails)
+            controller.saveReviewToNotifyByEmail(review);
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
