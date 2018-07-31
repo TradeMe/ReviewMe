@@ -47,6 +47,7 @@
     "google-play-scraper": "^6.1.0",
     "googleapis": "^20.2.0",
     "moment": "^2.20.1",
+    "nodemailer": "^4.6.7",
     "npm": "^5.6.0",
     "request": "~2.67.0"
   }
