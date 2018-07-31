@@ -1,6 +1,7 @@
 const request = require('request');
 const appstore = require('./appstorereviews.js');
 const googlePlay = require('./googleplayreviews.js');
+const nodemailer = require('nodemailer');
 
 const REVIEWS_STORES = {
     "APP_STORE": "app-store",
@@ -83,6 +84,34 @@ exports.postToSlack = function (message, config) {
     });
 };
 
+// send the email using nodemailer
+exports.sendEmails = function(mailOptions, config){
+        let transporter = nodemailer.createTransport(config.emailOptions.transporter);
+
+        mailOptions.to = recipientList(config.emailOptions.recipientList);
+        mailOptions.from = '"' + (config.emailOptions.senderName || "ReviewMe") + '"' 
+            + " <" + config.emailOptions.from + ">";
+        
+        console.log("INFO: Sending new email");
+        console.log("INFO: email: ", JSON.stringify(mailOptions));
+    
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return console.log(error);
+            }
+            console.log('INFO: email sent: %s', info.messageId);    
+        });
+}
+
+// transform email into comma separated email addresses
+function recipientList(emails){
+    var recipients = "";
+    for(let i = 0; i < emails.length; i++){
+        recipients += emails[i];
+        if(i != emails.length - 1) recipients += ', ';
+    }
+    return recipients;
+}
 
 var appStoreName = function (config) {
     return config.store === REVIEWS_STORES.APP_STORE ? "App Store" : "Google Play";

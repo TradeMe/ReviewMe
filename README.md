@@ -40,7 +40,22 @@ ReviewMe requires a config file. A simple config looks something like:
               "us",
       ]
     }
-  ]
+  ],
+  "sendByEmail": true,
+  "emailOptions":{
+    "transporter":{
+      "host": "mail.example.com",
+      "port": 465,
+      "secure": true, 
+      "auth": {
+        "user": "mail@example.com",
+        "pass": "123456"
+      }
+    },
+    "from": "mail@exmple.com",
+    "senderName": "Reviews",
+    "recipientList": ["recipient1@gmail.com", "recipient2@gmail.com"]
+  }
 }
 ```
 ### Options
@@ -54,12 +69,16 @@ ReviewMe requires a config file. A simple config looks something like:
 * **interval** The interval (in millseconds) to check for new reviews
 * **apps** A list of apps to fetch reviews for. See App Options below
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.
+* **sendByEmail** When enabled, new reviews will be sent by email
 
 ### App options
 
 * **appId** The Android app package name, or the iOS app ID.
 * **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for
 
+## Email Options
+* **transporter** A [nodemailer](https://nodemailer.com/about/) transporter object
+* **recipientList** An array containing the email addresses that should receive new reviews
 
 ## Google Play Publisher Key
 ReviewMe requires access to the Google Play Publisher API to fetch reviews. You need to supply ReviewMe with a Google Play Publisher API private key:
