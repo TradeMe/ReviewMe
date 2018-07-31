@@ -65,6 +65,7 @@ ReviewMe requires a config file. A simple config looks something like:
 * **botEmoji** A slack emoji to use for the bot avatar, e.g. `:apple:`
 * **showAppIcon** Determines if app icon will be displayed
 * **interval** The interval (in seconds) to check for new reviews. Default: `300`.
+* **notifyEmails** When enabled, reviews will be sent to a list of emails.
 * **apps** A list of apps to fetch reviews for. See App Options below
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.
 
