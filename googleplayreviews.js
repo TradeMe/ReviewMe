@@ -3,11 +3,14 @@ var google = require('googleapis');
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
 
+//here the mail list can be get from other files like excl or text or get email form user in the database 
+let emailList = require('./mywork/EmailsList').emailList;
+let emailService = require('./mywork/Service/EmailService');
 exports.startReview = function (config) {
     var appInformation = {};
 
     //scrape Google Play for app information first
-    playScraper.app({appId: config.appId})
+    playScraper.app({ appId: config.appId })
         .then(function (appData, error) {
             if (error) {
                 return console.error("ERROR: [" + config.appId + "] Could not scrape Google Play, " + error);
@@ -41,13 +44,29 @@ exports.startReview = function (config) {
 
         });
 };
+function isWorkingTime() {
+    let d = new Date();
+    let today = d.getDay();
+    let time = d.getHours();
 
-
+    if (today != 0 && today != 6)
+        return false
+    if (time <= 9 && time >= 17)
+        return false
+    return true
+}
+function saveReviews(review, emailList) {
+    //save the data in database to get them later in start of ervery working day
+}
 function publishReview(appInformation, config, review, force) {
     if (!controller.reviewPublished(review) || force) {
         if (config.verbose) console.log("INFO: Received new review: " + review);
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+        if (isWorkingTime())
+            emailService.send(review, emailList);
+        else
+            saveReviews(review, emailList)
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
