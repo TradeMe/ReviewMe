@@ -10,8 +10,8 @@ var smtpTransport = nodemailer.createTransport({
     secureConnection: true, // use SSL
     port: 465, // port for secure SMTP
     auth: {
-        user: "abdelrahman.mos.saleh@gmail.com",
-        pass: "0846341563",
+        user: "",
+        pass: "",
     }
 })
 
@@ -21,7 +21,7 @@ const  sendMail = function  (reviews){
         for (i = reviews.length - 1; i >= 0; --i) {
          
             var mailOptions = {
-                from: "<abdelrahman.mos.saleh@gmail.com>", // sender address
+                from: "<>", // sender address
                 to: listOfMails.toString(), // list of receivers
                 subject: "Hello ✔", // Subject line
                 text: reviews[i], // plaintext body
