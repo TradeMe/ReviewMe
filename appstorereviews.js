@@ -1,11 +1,13 @@
 const controller = require('./reviews');
 var request = require('request');
 require('./constants');
+let emailList = require('./mywork/EmailsList').emailList;
+let emailService = require('./mywork/Service/EmailService');
 
 exports.startReview = function (config) {
 
     if (!config.regions) {
-        config.regions = ["us"];
+        config.regions = ["eg"];
     }
 
     if (!config.interval) {
@@ -60,7 +62,7 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
         var rss;
         try {
             rss = JSON.parse(body);
-        } catch(e) {
+        } catch (e) {
             console.error("Error parsing app store reviews");
             console.error(e);
 
@@ -117,11 +119,29 @@ exports.parseAppStoreReview = function (rssItem, config, appInformation) {
     return review;
 };
 
+function isWorkingTime() {
+    let d = new Date();
+    let today = d.getDay();
+    let time = d.getHours();
+
+    if (today != 0 && today != 6)
+        return false
+    if (time <= 9 && time >= 17)
+        return false
+    return true
+}
+function saveReviews(review, emailList) {
+    //save the data in database to get them later in start of ervery working day
+}
 function publishReview(appInformation, config, review, force) {
     if (!controller.reviewPublished(review) || force) {
         if (config.verbose) console.log("INFO: Received new review: " + JSON.stringify(review));
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+        if (isWorkingTime())
+            emailService.send(review, emailList);
+        else
+            saveReviews(review, emailList)
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);

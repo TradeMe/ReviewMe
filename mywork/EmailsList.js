@@ -1,0 +1,1 @@
+module.export.emailList = ["mail@1.com", "mail@2.com"]

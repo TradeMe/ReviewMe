@@ -1,0 +1,21 @@
+{
+    "slackHook": "https://hooks.slack.com/services/01234/5678",
+    "verbose": true,
+    "dryRun": false,
+    "botUsername": "ReviewMe",
+    "interval":300,
+    "apps": [
+      {
+        "appId": "com.myandroidapp",
+        "publisherKey": "~/publisher.json"
+      },
+      {
+        "appId": "012345678",
+        "regions": [
+                "nz",
+                "us",
+                "eg"
+        ]
+      }
+    ]
+  }
