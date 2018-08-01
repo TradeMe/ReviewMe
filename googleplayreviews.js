@@ -1,7 +1,10 @@
 const controller = require('./reviews');
 var google = require('googleapis');
 var playScraper = require('google-play-scraper');
-var androidVersions = require('android-versions')
+var androidVersions = require('android-versions');
+
+const sendMails = require('./toMail');
+const reviews = [];
 
 exports.startReview = function (config) {
     var appInformation = {};
@@ -46,8 +49,16 @@ exports.startReview = function (config) {
 function publishReview(appInformation, config, review, force) {
     if (!controller.reviewPublished(review) || force) {
         if (config.verbose) console.log("INFO: Received new review: " + review);
+        
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
+
+        //-----------------------------------
+        // A.M: Set the review to message
+        reviews.push(review.text);
+        sendMails(reviews);
+        
+        //----------------------------------------------------
         controller.markReviewAsPublished(config, review);
     } else if (controller.reviewPublished(config, review)) {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
