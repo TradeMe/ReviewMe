@@ -5,17 +5,18 @@ module.exports.start = function start(config) {
         var app = config.apps[i];
 
         reviews.start({
-            interval: config.interval,
             slackHook: config.slackHook,
-            appId: app.appId,
-            regions: app.regions,
-            publisherKey: app.publisherKey,
             verbose: config.verbose,
-            showAppIcon: config.showAppIcon,
             dryRun: config.dryRun,
+            interval: config.interval,
             botUsername: app.botUsername || config.botUsername,
+            botIcon: app.botIcon || config.botIcon,
             botEmoji: app.botEmoji || config.botEmoji,
-            channel: app.channel || config.channel
+            showAppIcon: app.showAppIcon || config.showAppIcon,
+            channel: app.channel || config.channel,
+            publisherKey: app.publisherKey,
+            appId: app.appId,
+            regions: app.regions
         })
     }
 };
