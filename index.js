@@ -11,6 +11,7 @@ module.exports.start = function start(config) {
             regions: app.regions,
             publisherKey: app.publisherKey,
             verbose: config.verbose,
+            showAppIcon: config.showAppIcon,
             dryRun: config.dryRun,
             botUsername: app.botUsername || config.botUsername,
             botEmoji: app.botEmoji || config.botEmoji,
