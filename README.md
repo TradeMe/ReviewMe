@@ -51,14 +51,21 @@ ReviewMe requires a config file. A simple config looks something like:
 * **botIcon** An image url to use for the bot avatar
 * **botEmoji** A slack emoji to use for the bot avatar, e.g. `:apple:`
 * **showAppIcon** Determines if app icon will be displayed
+* **channel** Overrides the default Slack channel messages will be posted to
 * **interval** The interval (in seconds) to check for new reviews. Default: `300`.
 * **apps** A list of apps to fetch reviews for. See App Options below
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.
 
 ### App options
+Note: Some options override the global configuration
 
 * **appId** The Android app package name, or the iOS app ID.
 * **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for
+* **botUsername** The username of the Slack bot
+* **botIcon** An image url to use for the bot avatar
+* **botEmoji** A slack emoji to use for the bot avatar, e.g. `:apple:`
+* **showAppIcon** Determines if app icon will be displayed
+* **channel** Overrides the default Slack channel messages will be posted to
 
 
 ## Google Play Publisher Key
