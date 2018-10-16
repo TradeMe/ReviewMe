@@ -17,6 +17,7 @@ exports.startReview = function (config) {
 
         const appInformation = {};
         appInformation.region = region;
+        appInformation.appName = config.appName;
 
         exports.fetchAppStoreReviews(config, appInformation, function (entries) {
             var reviewLength = entries.length;

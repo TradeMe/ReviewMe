@@ -16,6 +16,7 @@ module.exports.start = function start(config) {
             channel: app.channel || config.channel,
             publisherKey: app.publisherKey,
             appId: app.appId,
+            appName: app.appName,
             regions: app.regions
         })
     }
