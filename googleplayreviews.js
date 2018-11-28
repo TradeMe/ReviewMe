@@ -3,7 +3,7 @@ var google = require('googleapis');
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
 
-exports.startReview = function (config) {
+exports.startReview = function (config, first_run) {
     var appInformation = {};
 
     //scrape Google Play for app information first
@@ -16,17 +16,25 @@ exports.startReview = function (config) {
             appInformation.appName = appData.title;
             appInformation.appIcon = appData.icon;
 
-            exports.fetchGooglePlayReviews(config, appInformation, function (entries) {
-                var reviewLength = entries.length;
-
-                for (var i = 0; i < reviewLength; i++) {
-                    var initialReview = entries[i];
-                    controller.markReviewAsPublished(config, initialReview);
+            exports.fetchGooglePlayReviews(config, appInformation, function (reviews) {
+                // If we don't have any published reviews, then treat this as a baseline fetch, we won't post any
+                // reviews to slack, but new ones from now will be posted
+                if (first_run) {
+                    var reviewLength = reviews.length;
+    
+                    for (var i = 0; i < reviewLength; i++) {
+                        var initialReview = reviews[i];
+                        controller.markReviewAsPublished(config, initialReview);
+                    }
+        
+                    if (config.dryRun && reviews.length > 0) {
+                        // Force publish a review if we're doing a dry run
+                        publishReview(appInformation, config, reviews[reviews.length - 1], config.dryRun);
+                    }
                 }
-
-                if (config.dryRun && entries.length > 0) {
-                    publishReview(appInformation, config, entries[entries.length - 1], config.dryRun);
-                }
+                else {
+                    exports.handleFetchedGooglePlayReviews(config, appInformation, reviews);
+                }      
 
                 var interval_seconds = config.interval ? config.interval : DEFAULT_INTERVAL_SECONDS;
 
@@ -44,12 +52,12 @@ exports.startReview = function (config) {
 
 
 function publishReview(appInformation, config, review, force) {
-    if (!controller.reviewPublished(review) || force) {
-        if (config.verbose) console.log("INFO: Received new review: " + review);
+    if (!controller.reviewPublished(config, review) || force) {
+        if (config.verbose) console.log("INFO: Received new review: " + JSON.stringify(review));
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
         controller.markReviewAsPublished(config, review);
-    } else if (controller.reviewPublished(config, review)) {
+    } else {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
     }
 }

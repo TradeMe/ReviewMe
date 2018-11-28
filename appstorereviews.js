@@ -2,7 +2,7 @@ const controller = require('./reviews');
 var request = require('request');
 require('./constants');
 
-exports.startReview = function (config) {
+exports.startReview = function (config, first_run) {
 
     if (!config.regions) {
         config.regions = ["us"];
@@ -12,38 +12,91 @@ exports.startReview = function (config) {
         config.interval = DEFAULT_INTERVAL_SECONDS
     }
 
-    for (var i = 0; i < config.regions.length; i++) {
-        const region = config.regions[i];
-
-        const appInformation = {};
-        appInformation.region = region;
-        appInformation.appName = config.appName;
-
-        exports.fetchAppStoreReviews(config, appInformation, function (entries) {
-            var reviewLength = entries.length;
-
-            for (var i = 0; i < reviewLength; i++) {
-                var initialReview = entries[i];
-                controller.markReviewAsPublished(config, initialReview);
-            }
-
-            if (config.dryRun && entries.length > 0) {
-                publishReview(appInformation, config, entries[entries.length - 1], config.dryRun);
-            }
-
-            //calculate the interval with an offset, to avoid spamming the server
-            var interval_seconds = config.interval + (i * 10);
-
-            setInterval(function (config, appInformation) {
-                if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
-
-                exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
+    // Find the app information to get a icon URL
+    exports.fetchAppInformation(config, config.regions[0], function (iconUrl) {
+        for (var i = 0; i < config.regions.length; i++) {
+            const region = config.regions[i];
+    
+            const appInformation = {};
+            appInformation.region = region;
+            appInformation.appName = config.appName;
+            appInformation.appIcon = iconUrl;
+    
+            exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
+                // If we don't have any published reviews, then treat this as a baseline fetch, we won't post any
+                // reviews to slack, but new ones from now will be posted
+        
+                if (first_run) {
+                    var reviewLength = reviews.length;
+    
+                    for (var j = 0; j < reviewLength; j++) {
+                        var initialReview = reviews[j];
+                        controller.markReviewAsPublished(config, initialReview);
+                    }
+        
+                    if (config.dryRun && reviews.length > 0) {
+                        // Force publish a review if we're doing a dry run
+                        publishReview(appInformation, config, reviews[reviews.length - 1], config.dryRun);
+                    }
+                }
+                else {
                     exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
-                });
-            }, interval_seconds * 1000, config, appInformation);
-        });
-    }
+                }        
+    
+                //calculate the interval with an offset, to avoid spamming the server
+                var interval_seconds = config.interval + (i * 10);
+    
+                setInterval(function (config, appInformation) {
+                    if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
+    
+                    exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
+                        exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
+                    });
+                }, interval_seconds * 1000, config, appInformation);
+            });
+        }
+    });
 };
+
+exports.fetchAppInformation = function (config, region, callback) {
+    const url = "https://itunes.apple.com/lookup?id=" + config.appId + "&country=" + region;
+
+    request(url, function (error, response, body) {
+        if (error) {
+            if (config.verbose) {
+                if (config.verbose) console.log("ERROR: Error fetching app information from App Store for (" + config.appId + ")");
+                console.log(error)
+            }
+            callback(null);
+            return;
+        }
+
+        var info;
+        try {
+            info = JSON.parse(body);
+        } catch(e) {
+            console.error("Error parsing app information");
+            console.error(e);
+
+            callback(null);
+            return;
+        }
+
+        var result = info.results[0];
+
+        if (result == null) {
+            if (config.verbose) console.log("INFO: Received no info from App Store for (" + config.appId + ")");
+            callback(null);
+            return;
+        }
+
+        if (config.verbose) console.log("INFO: Received info from App Store for (" + config.appId + ")");
+
+        if (config.verbose) console.log("INFO: Set icon URL (" + result.artworkUrl100 + ") for (" + config.appId + ")");
+
+        callback(result.artworkUrl100)
+    });
+}
 
 exports.fetchAppStoreReviews = function (config, appInformation, callback) {
     const url = "https://itunes.apple.com/" + appInformation.region + "/rss/customerreviews/id=" + config.appId + "/sortBy=mostRecent/json";
@@ -96,7 +149,7 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
 
 
 exports.handleFetchedAppStoreReviews = function (config, appInformation, reviews) {
-    if (config.verbose) console.log("INFO: [" + config.appId + "] Handling fetched reviews");
+    if (config.verbose) console.log("INFO: [" + config.appId + "(" + appInformation.region + ")] Handling fetched reviews");
     for (var n = 0; n < reviews.length; n++) {
         var review = reviews[n];
         publishReview(appInformation, config, review, false)
@@ -119,12 +172,12 @@ exports.parseAppStoreReview = function (rssItem, config, appInformation) {
 };
 
 function publishReview(appInformation, config, review, force) {
-    if (!controller.reviewPublished(review) || force) {
+    if (!controller.reviewPublished(config, review) || force) {
         if (config.verbose) console.log("INFO: Received new review: " + JSON.stringify(review));
         var message = slackMessage(review, config, appInformation);
         controller.postToSlack(message, config);
         controller.markReviewAsPublished(config, review);
-    } else if (controller.reviewPublished(config, review)) {
+    } else {
         if (config.verbose) console.log("INFO: Review already published: " + review.text);
     }
 }
