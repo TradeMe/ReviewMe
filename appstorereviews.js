@@ -16,24 +16,24 @@ exports.startReview = function (config, first_run) {
     exports.fetchAppInformation(config, config.regions[0], function (iconUrl) {
         for (var i = 0; i < config.regions.length; i++) {
             const region = config.regions[i];
-    
+
             const appInformation = {};
             appInformation.region = region;
             appInformation.appName = config.appName;
             appInformation.appIcon = iconUrl;
-    
+
             exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
                 // If we don't have any published reviews, then treat this as a baseline fetch, we won't post any
                 // reviews to slack, but new ones from now will be posted
-        
+
                 if (first_run) {
                     var reviewLength = reviews.length;
-    
+
                     for (var j = 0; j < reviewLength; j++) {
                         var initialReview = reviews[j];
                         controller.markReviewAsPublished(config, initialReview);
                     }
-        
+
                     if (config.dryRun && reviews.length > 0) {
                         // Force publish a review if we're doing a dry run
                         publishReview(appInformation, config, reviews[reviews.length - 1], config.dryRun);
@@ -41,14 +41,14 @@ exports.startReview = function (config, first_run) {
                 }
                 else {
                     exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
-                }        
-    
+                }
+
                 //calculate the interval with an offset, to avoid spamming the server
                 var interval_seconds = config.interval + (i * 10);
-    
+
                 setInterval(function (config, appInformation) {
                     if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
-    
+
                     exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
                         exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
                     });
@@ -250,18 +250,13 @@ var slackMessage = function (review, config, appInformation) {
     }
 
     return {
-        "username": config.botUsername,
-        "icon_url": config.botIcon,
-        "icon_emoji": config.botEmoji,
         "channel": config.channel,
         "attachments": [
             {
                 "mrkdwn_in": ["text", "pretext", "title"],
                 "color": color,
                 "author_name": review.author,
-
-                "thumb_url": config.showAppIcon ? (review.appIcon ? review.appIcon : appInformation.appIcon) : null,
-
+                "thumb_url": config.showAppIcon ? (review.appIcon ? review.appIcon : appInformation.appIcon) : config.botIcon,
                 "title": title,
                 "text": text,
                 "footer": footer
