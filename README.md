@@ -57,7 +57,7 @@ ReviewMe requires a config file. A simple config looks something like:
 Note: Some options override the global configuration
 
 * **appId** The Android app package name, or the iOS app ID.
-* **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for
+* **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for (use `false` to include all regions)
 * **botIcon** An image url to use for the bot avatar
 * **showAppIcon** Determines if app icon will be displayed (overrides botIcon)
 * **channel** Overrides the default Slack channel messages will be posted to
