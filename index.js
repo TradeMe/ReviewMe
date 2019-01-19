@@ -19,20 +19,3 @@ module.exports.start = function start(config) {
         })
     }
 };
-
-var config = {
-    "slackHook": "https://hooks.slack.com/services/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",
-    "verbose": true,
-    "dryRun": false,
-    "showAppIcon": false,
-    "interval":300,
-    "apps": [
-        {
-            "botIcon": "https://d3j72de684fey1.cloudfront.net/resized/a450ccf60e0b0fc9aba5e1309daa9d5cffcf0f62.PjI1NngyNTY.png",
-            "appId": "1448299719",
-            regions: false,
-        }
-    ]
-}
-
-module.exports.start(config);
