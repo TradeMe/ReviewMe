@@ -1,9 +1,17 @@
 const controller = require('./reviews');
+const fs = require('fs');
 var request = require('request');
 require('./constants');
 
 exports.startReview = function (config, first_run) {
 
+    if (config.regions === false){
+        try {
+            config.regions = JSON.parse(fs.readFileSync(__dirname  + '/regions.json'));
+        } catch (err) {
+            config.regions = ["us"];
+        }
+    }
     if (!config.regions) {
         config.regions = ["us"];
     }
@@ -13,14 +21,12 @@ exports.startReview = function (config, first_run) {
     }
 
     // Find the app information to get a icon URL
-    exports.fetchAppInformation(config, config.regions[0], function (iconUrl) {
+    exports.fetchAppInformation(config, function (globalAppInformation) {
         for (var i = 0; i < config.regions.length; i++) {
             const region = config.regions[i];
 
-            const appInformation = {};
+            const appInformation = Object.assign({},globalAppInformation);
             appInformation.region = region;
-            appInformation.appName = config.appName;
-            appInformation.appIcon = iconUrl;
 
             exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
                 // If we don't have any published reviews, then treat this as a baseline fetch, we won't post any
@@ -58,48 +64,8 @@ exports.startReview = function (config, first_run) {
     });
 };
 
-exports.fetchAppInformation = function (config, region, callback) {
-    const url = "https://itunes.apple.com/lookup?id=" + config.appId + "&country=" + region;
-
-    request(url, function (error, response, body) {
-        if (error) {
-            if (config.verbose) {
-                if (config.verbose) console.log("ERROR: Error fetching app information from App Store for (" + config.appId + ")");
-                console.log(error)
-            }
-            callback(null);
-            return;
-        }
-
-        var info;
-        try {
-            info = JSON.parse(body);
-        } catch(e) {
-            console.error("Error parsing app information");
-            console.error(e);
-
-            callback(null);
-            return;
-        }
-
-        var result = info.results[0];
-
-        if (result == null) {
-            if (config.verbose) console.log("INFO: Received no info from App Store for (" + config.appId + ")");
-            callback(null);
-            return;
-        }
-
-        if (config.verbose) console.log("INFO: Received info from App Store for (" + config.appId + ")");
-
-        if (config.verbose) console.log("INFO: Set icon URL (" + result.artworkUrl100 + ") for (" + config.appId + ")");
-
-        callback(result.artworkUrl100)
-    });
-}
-
-exports.fetchAppStoreReviews = function (config, appInformation, callback) {
-    const url = "https://itunes.apple.com/" + appInformation.region + "/rss/customerreviews/id=" + config.appId + "/sortBy=mostRecent/json";
+var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback){
+    const url = "https://itunes.apple.com/" + appInformation.region + "/rss/customerreviews/page="+page+"/id=" + config.appId + "/sortBy=mostRecent/json";
 
     request(url, function (error, response, body) {
         if (error) {
@@ -132,19 +98,32 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
 
         if (config.verbose) console.log("INFO: Received reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
 
-        updateAppInformation(config, entries, appInformation);
-
         var reviews = entries
-            .filter(function (review) {
-                return !isAppInformationEntry(review)
-            })
-            .reverse()
-            .map(function (review) {
-                return exports.parseAppStoreReview(review, config, appInformation);
-            });
+          .filter(function (review) {
+              return !isAppInformationEntry(review)
+          })
+          .reverse()
+          .map(function (review) {
+              return exports.parseAppStoreReview(review, config, appInformation);
+          });
 
         callback(reviews)
     });
+};
+
+exports.fetchAppStoreReviews = function (config, appInformation, callback) {
+    var page = 1;
+    var allReviews = [];
+    function pageCallback(reviews){
+        allReviews = allReviews.concat(reviews);
+        if (reviews.length > 0 && page < 11){
+            page++;
+            fetchAppStoreReviewsByPage(config, appInformation, page, pageCallback);
+        } else {
+            callback(allReviews);
+        }
+    }
+    fetchAppStoreReviewsByPage(config, appInformation, page, pageCallback);
 };
 
 
@@ -166,7 +145,7 @@ exports.parseAppStoreReview = function (rssItem, config, appInformation) {
     review.text = rssItem.content.label;
     review.rating = reviewRating(rssItem);
     review.author = reviewAuthor(rssItem);
-    review.link = config.appLink ? config.appLink : appInformation.appLink;
+    review.link = reviewLink(rssItem) || appInformation.appLink;
     review.storeName = "App Store";
     return review;
 };
@@ -190,29 +169,67 @@ var reviewAuthor = function (review) {
     return review.author ? review.author.name.label : '';
 };
 
+var reviewLink = function (review) {
+    return review.author ? review.author.uri.label : '';
+};
+
 var reviewAppVersion = function (review) {
     return review['im:version'] ? review['im:version'].label : '';
 };
 
 // App Store app information
-var updateAppInformation = function (config, entries, appInformation) {
-    for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-
-        if (!isAppInformationEntry(entry)) continue;
-
-        if (!config.appName && entry['im:name']) {
-            appInformation.appName = entry['im:name'].label;
+exports.fetchAppInformation = function (config, callback) {
+    const url = "https://itunes.apple.com/lookup?id=" + config.appId;
+    const appInformation = {
+        appName: config.appName,
+        appIcon: config.appIcon,
+        appLink: config.appLink
+    };
+    request(url, function (error, response, body) {
+        if (error) {
+            if (config.verbose) {
+                if (config.verbose) console.log("ERROR: Error fetching app data from App Store for (" + config.appId + ")");
+                console.log(error)
+            }
+            callback(appInformation);
+            return;
         }
 
-        if (!config.appIcon && entry['im:image'] && entry['im:image'].length > 0) {
-            appInformation.appIcon = entry['im:image'][0].label;
+        var data;
+        try {
+            data = JSON.parse(body);
+        } catch(e) {
+            console.error("Error parsing app store data");
+            console.error(e);
+
+            callback(appInformation);
+            return;
         }
 
-        if (!config.appLink && entry['link']) {
-            appInformation.appLink = entry['link'].attributes.href;
+        var entries = data.results;
+
+        if (entries == null || !entries.length > 0) {
+            if (config.verbose) console.log("INFO: Received no data from App Store for (" + config.appId + ")");
+            callback(appInformation);
+            return;
         }
-    }
+
+        if (config.verbose) console.log("INFO: Received data from App Store for (" + config.appId + ")");
+        var entry = entries[0];
+        if (!config.appName && entry.trackCensoredName) {
+            appInformation.appName = entry.trackCensoredName;
+        }
+
+        if (!config.appIcon && entry.artworkUrl100 ) {
+            appInformation.appIcon = entry.artworkUrl100;
+        }
+
+        if (!config.appLink && entry.trackViewUrl) {
+            appInformation.appLink = entry.trackViewUrl;
+        }
+
+        callback(appInformation)
+    });
 };
 
 var isAppInformationEntry = function (entry) {
