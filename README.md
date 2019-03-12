@@ -36,7 +36,7 @@ ReviewMe requires a config file. A simple config looks something like:
       "appId": "012345678",
       "regions": [
               "nz",
-              "us",
+              "us"
       ]
     }
   ]
