@@ -26,7 +26,6 @@ ReviewMe requires a config file. A simple config looks something like:
   "slackHook": "https://hooks.slack.com/services/01234/5678",
   "verbose": true,
   "dryRun": false,
-  "botUsername": "ReviewMe",
   "interval":300,
   "apps": [
     {
@@ -47,10 +46,8 @@ ReviewMe requires a config file. A simple config looks something like:
 * **slackHook**: The slack hook for your Slack integration. Reviews will be posted here.
 * **verbose**: When enabled, log messages will be printed to the console
 * **dryRun**: When enabled, ReviewMe will post the latest app review for each app on startup. Useful for debugging
-* **botUsername** The username of the Slack bot
 * **botIcon** An image url to use for the bot avatar
-* **botEmoji** A slack emoji to use for the bot avatar, e.g. `:apple:`
-* **showAppIcon** Determines if app icon will be displayed
+* **showAppIcon** Determines if app icon will be displayed (overrides botIcon)
 * **channel** Overrides the default Slack channel messages will be posted to
 * **interval** The interval (in seconds) to check for new reviews. Default: `300`.
 * **apps** A list of apps to fetch reviews for. See App Options below
@@ -60,11 +57,9 @@ ReviewMe requires a config file. A simple config looks something like:
 Note: Some options override the global configuration
 
 * **appId** The Android app package name, or the iOS app ID.
-* **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for
-* **botUsername** The username of the Slack bot
+* **regions** *iOS Only* The [ISO 3166-2](https://en.wikipedia.org/wiki/ISO_3166-2#Current_codes) regions to fetch reviews for (use `false` to include all regions)
 * **botIcon** An image url to use for the bot avatar
-* **botEmoji** A slack emoji to use for the bot avatar, e.g. `:apple:`
-* **showAppIcon** Determines if app icon will be displayed
+* **showAppIcon** Determines if app icon will be displayed (overrides botIcon)
 * **channel** Overrides the default Slack channel messages will be posted to
 
 
@@ -73,7 +68,7 @@ ReviewMe requires access to the Google Play Publisher API to fetch reviews. You 
 
 * Go to the Google Play Developer Console -> Settings -> API Access
 * Create a Google Play Android Developer project
-* Create a Service Account
+* Create a Service Account with "Service Accounts" -> "Service Account User" role
 * Download the private key (`.json`)
 * Supply the path to the private key in the `config.json`
 

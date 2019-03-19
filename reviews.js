@@ -42,12 +42,12 @@ exports.markReviewAsPublished = function (config, review) {
     if (config.verbose) {
         console.log("INFO: Checking if we need to prune published reviews have (" + published_reviews[config.appId].length + ") limit (" + REVIEWS_LIMIT + ")");
     }
-    if (published_reviews[config.appId].length >= REVIEWS_LIMIT) {        
+    if (published_reviews[config.appId].length >= REVIEWS_LIMIT) {
         published_reviews[config.appId] = published_reviews[config.appId].slice(0, REVIEWS_LIMIT);
     }
 
     published_reviews[config.appId].unshift(review.id);
-    
+
     if (config.verbose) {
         console.log("INFO: Review marked as published: " + JSON.stringify(published_reviews[config.appId]));
     }
@@ -68,25 +68,6 @@ exports.resetPublishedReviews = function () {
     return published_reviews = {};
 };
 
-exports.welcomeMessage = function (config, appInformation) {
-    var storeName = appStoreName(config);
-    var appName = config.appName ? config.appName : (appInformation.appName ? appInformation.appName : config.appId);
-    return {
-        "username": config.botUsername,
-        "icon_url": config.botIcon,
-        "channel": config.channel,
-        "attachments": [
-            {
-                "mrkdwn_in": ["pretext", "author_name"],
-                "fallback": "This channel will now receive " + storeName + " reviews for " + appName,
-                "pretext": "This channel will now receive " + storeName + " reviews for ",
-                "author_name": appName,
-                "author_icon": config.appIcon ? config.appIcon : appInformation.appIcon
-            }
-        ]
-    }
-};
-
 exports.postToSlack = function (message, config) {
     var messageJSON = JSON.stringify(message);
     if (config.verbose) {
@@ -101,9 +82,4 @@ exports.postToSlack = function (message, config) {
         },
         body: messageJSON
     });
-};
-
-
-var appStoreName = function (config) {
-    return config.store === REVIEWS_STORES.APP_STORE ? "App Store" : "Google Play";
 };

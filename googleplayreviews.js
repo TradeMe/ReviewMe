@@ -21,12 +21,12 @@ exports.startReview = function (config, first_run) {
                 // reviews to slack, but new ones from now will be posted
                 if (first_run) {
                     var reviewLength = reviews.length;
-    
+
                     for (var i = 0; i < reviewLength; i++) {
                         var initialReview = reviews[i];
                         controller.markReviewAsPublished(config, initialReview);
                     }
-        
+
                     if (config.dryRun && reviews.length > 0) {
                         // Force publish a review if we're doing a dry run
                         publishReview(appInformation, config, reviews[reviews.length - 1], config.dryRun);
@@ -34,7 +34,7 @@ exports.startReview = function (config, first_run) {
                 }
                 else {
                     exports.handleFetchedGooglePlayReviews(config, appInformation, reviews);
-                }      
+                }
 
                 var interval_seconds = config.interval ? config.interval : DEFAULT_INTERVAL_SECONDS;
 
@@ -179,9 +179,6 @@ var slackMessage = function (review, config, appInformation) {
     }
 
     return {
-        "username": config.botUsername,
-        "icon_url": config.botIcon,
-        "icon_emoji": config.botEmoji,
         "channel": config.channel,
         "attachments": [
             {
@@ -190,7 +187,7 @@ var slackMessage = function (review, config, appInformation) {
                 "color": color,
                 "author_name": review.author,
 
-                "thumb_url": config.showAppIcon ? appInformation.appIcon : null,
+                "thumb_url": config.showAppIcon ? appInformation.appIcon : config.botIcon,
 
                 "title": title,
 
