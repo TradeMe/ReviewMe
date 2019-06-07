@@ -116,7 +116,7 @@ exports.fetchAppStoreReviews = function (config, appInformation, callback) {
     var allReviews = [];
     function pageCallback(reviews){
         allReviews = allReviews.concat(reviews);
-        if (reviews.length > 0 && page < 11){
+        if (reviews.length > 0 && page < 10){
             page++;
             fetchAppStoreReviewsByPage(config, appInformation, page, pageCallback);
         } else {
