@@ -21,7 +21,7 @@ This project was originally forked from [reviews-to-slack](https://www.npmjs.com
 
 ReviewMe requires a config file. A simple config looks something like:
 
-```
+```json
 {
   "slackHook": "https://hooks.slack.com/services/01234/5678",
   "verbose": true,
