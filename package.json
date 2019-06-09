@@ -42,12 +42,9 @@
   },
   "dependencies": {
     "android-versions": "^1.4.0",
-    "cheerio": "~1.0.0-rc.3",
     "commander": "^4.0.1",
     "google-play-scraper": "^7.1.1",
     "googleapis": "^45.0.0",
-    "moment": "^2.24.0",
-    "npm": "^6.8.0",
     "request": "^2.88.0"
   }
 }
