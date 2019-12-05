@@ -1,6 +1,6 @@
 {
   "name": "@trademe/reviewme",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "Google Play and App Store reviews posted to Slack",
   "main": "index.js",
   "scripts": {
@@ -33,19 +33,19 @@
   },
   "homepage": "https://github.com/TradeMe/ReviewMe#readme",
   "devDependencies": {
-    "chai": "3.5.0",
-    "co-mocha": "1.1.2",
-    "forever": "^0.15.3",
-    "mocha": "2.5.3",
-    "sinon": "1.17.4",
-    "sinon-chai": "2.8.0"
+    "chai": "4.2.0",
+    "co-mocha": "1.2.2",
+    "forever": "^1.0.0",
+    "mocha": "6.2.2",
+    "sinon": "7.5.0",
+    "sinon-chai": "3.3.0"
   },
   "dependencies": {
     "android-versions": "^1.4.0",
-    "cheerio": "~0.22.0",
-    "commander": "^2.19.0",
-    "google-play-scraper": "^6.2.3",
-    "googleapis": "^20.2.0",
+    "cheerio": "~1.0.0-rc.3",
+    "commander": "^4.0.1",
+    "google-play-scraper": "^7.1.1",
+    "googleapis": "^45.0.0",
     "moment": "^2.24.0",
     "npm": "^6.8.0",
     "request": "^2.88.0"
