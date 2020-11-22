@@ -1,6 +1,7 @@
 const controller = require('./reviews');
 const fs = require('fs');
 var request = require('request');
+var schedule = require('node-schedule');
 require('./constants');
 
 exports.startReview = function (config, first_run) {
@@ -16,8 +17,8 @@ exports.startReview = function (config, first_run) {
         config.regions = ["us"];
     }
 
-    if (!config.interval) {
-        config.interval = DEFAULT_INTERVAL_SECONDS
+    if (!config.cronStyleSchedule) {
+        config.cronStyleSchedule = DEFAULT_CRON_STYLE_SCHEDULE
     }
 
     // Find the app information to get a icon URL
@@ -50,15 +51,17 @@ exports.startReview = function (config, first_run) {
                 }
 
                 //calculate the interval with an offset, to avoid spamming the server
-                var interval_seconds = config.interval + (i * 10);
+                var interval_seconds = i * 10;
 
-                setInterval(function (config, appInformation) {
-                    if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
+                schedule.scheduleJob(config.cronStyleSchedule, function () {
+                    setTimeout(() => {
+                        if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
 
-                    exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
-                        exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
-                    });
-                }, interval_seconds * 1000, config, appInformation);
+                        exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
+                            exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
+                        });
+                    }, interval_seconds * 1000);
+                });
             });
         }
     });
