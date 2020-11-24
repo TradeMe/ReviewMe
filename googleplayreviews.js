@@ -1,5 +1,5 @@
 const controller = require('./reviews');
-var {google} = require('googleapis');
+var { google } = require('googleapis');
 
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
@@ -8,7 +8,7 @@ exports.startReview = function (config, first_run) {
     var appInformation = {};
 
     //scrape Google Play for app information first
-    playScraper.app({appId: config.appId})
+    playScraper.app({ appId: config.appId })
         .then(function (appData, error) {
             if (error) {
                 return console.error("ERROR: [" + config.appId + "] Could not scrape Google Play, " + error);
@@ -37,19 +37,24 @@ exports.startReview = function (config, first_run) {
                     exports.handleFetchedGooglePlayReviews(config, appInformation, reviews);
                 }
 
-                if (!config.cronStyleSchedule) {
-                    config.cronStyleSchedule = DEFAULT_CRON_STYLE_SCHEDULE
+                if (!config.schedule) {
+                    config.schedule = DEFAULT_INTERVAL_SECONDS;
                 }
 
-                schedule.scheduleJob(config.cronStyleSchedule, function () {
+                var fetch = function (config, appInformation) {
                     if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching Google Play reviews");
 
                     exports.fetchGooglePlayReviews(config, appInformation, function (reviews) {
                         exports.handleFetchedGooglePlayReviews(config, appInformation, reviews);
                     });
-                });
-            });
+                }
 
+                if (typeof config.schedule === 'number') {
+                    setInterval(fetch, config.schedule * 1000, config, appInformation);
+                } else {
+                    schedule.scheduleJob(config.schedule, fetch(config, appInformation));
+                }
+            });
         });
 };
 

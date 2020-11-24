@@ -6,9 +6,9 @@ require('./constants');
 
 exports.startReview = function (config, first_run) {
 
-    if (config.regions === false){
+    if (config.regions === false) {
         try {
-            config.regions = JSON.parse(fs.readFileSync(__dirname  + '/regions.json'));
+            config.regions = JSON.parse(fs.readFileSync(__dirname + '/regions.json'));
         } catch (err) {
             config.regions = ["us"];
         }
@@ -17,8 +17,8 @@ exports.startReview = function (config, first_run) {
         config.regions = ["us"];
     }
 
-    if (!config.cronStyleSchedule) {
-        config.cronStyleSchedule = DEFAULT_CRON_STYLE_SCHEDULE
+    if (!config.schedule) {
+        config.schedule = DEFAULT_INTERVAL_SECONDS;
     }
 
     // Find the app information to get a icon URL
@@ -26,7 +26,7 @@ exports.startReview = function (config, first_run) {
         for (var i = 0; i < config.regions.length; i++) {
             const region = config.regions[i];
 
-            const appInformation = Object.assign({},globalAppInformation);
+            const appInformation = Object.assign({}, globalAppInformation);
             appInformation.region = region;
 
             exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
@@ -50,25 +50,31 @@ exports.startReview = function (config, first_run) {
                     exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
                 }
 
-                //calculate the interval with an offset, to avoid spamming the server
-                var interval_seconds = i * 10;
+                // calculate the interval with an offset, to avoid spamming the server
+                var interval_seconds = typeof config.schedule === 'number' ? config.schedule + (i * 10) : i * 10;
 
-                schedule.scheduleJob(config.cronStyleSchedule, function () {
-                    setTimeout(() => {
-                        if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
+                var fetch = function (config, appInformation) {
+                    if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
 
-                        exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
-                            exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
-                        });
-                    }, interval_seconds * 1000);
-                });
+                    exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
+                        exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
+                    });
+                };
+
+                if (typeof config.schedule === 'number') {
+                    setInterval(fetch, interval_seconds * 1000, config, appInformation);
+                } else {
+                    schedule.scheduleJob(config.schedule, function () {
+                        setTimeout(fetch, interval_seconds * 1000, config, appInformation);
+                    });
+                }
             });
         }
     });
 };
 
-var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback){
-    const url = "https://itunes.apple.com/" + appInformation.region + "/rss/customerreviews/page="+page+"/id=" + config.appId + "/sortBy=mostRecent/json";
+var fetchAppStoreReviewsByPage = function (config, appInformation, page, callback) {
+    const url = "https://itunes.apple.com/" + appInformation.region + "/rss/customerreviews/page=" + page + "/id=" + config.appId + "/sortBy=mostRecent/json";
 
     request(url, function (error, response, body) {
         if (error) {
@@ -83,7 +89,7 @@ var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback
         var rss;
         try {
             rss = JSON.parse(body);
-        } catch(e) {
+        } catch (e) {
             console.error("Error parsing app store reviews");
             console.error(e);
 
@@ -102,13 +108,13 @@ var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback
         if (config.verbose) console.log("INFO: Received reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
 
         var reviews = entries
-          .filter(function (review) {
-              return !isAppInformationEntry(review)
-          })
-          .reverse()
-          .map(function (review) {
-              return exports.parseAppStoreReview(review, config, appInformation);
-          });
+            .filter(function (review) {
+                return !isAppInformationEntry(review)
+            })
+            .reverse()
+            .map(function (review) {
+                return exports.parseAppStoreReview(review, config, appInformation);
+            });
 
         callback(reviews)
     });
@@ -117,9 +123,9 @@ var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback
 exports.fetchAppStoreReviews = function (config, appInformation, callback) {
     var page = 1;
     var allReviews = [];
-    function pageCallback(reviews){
+    function pageCallback(reviews) {
         allReviews = allReviews.concat(reviews);
-        if (reviews.length > 0 && page < 10){
+        if (reviews.length > 0 && page < 10) {
             page++;
             fetchAppStoreReviewsByPage(config, appInformation, page, pageCallback);
         } else {
@@ -201,7 +207,7 @@ exports.fetchAppInformation = function (config, callback) {
         var data;
         try {
             data = JSON.parse(body);
-        } catch(e) {
+        } catch (e) {
             console.error("Error parsing app store data");
             console.error(e);
 
@@ -223,7 +229,7 @@ exports.fetchAppInformation = function (config, callback) {
             appInformation.appName = entry.trackCensoredName;
         }
 
-        if (!config.appIcon && entry.artworkUrl100 ) {
+        if (!config.appIcon && entry.artworkUrl100) {
             appInformation.appIcon = entry.artworkUrl100;
         }
 

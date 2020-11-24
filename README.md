@@ -26,7 +26,7 @@ ReviewMe requires a config file. A simple config looks something like:
   "slackHook": "https://hooks.slack.com/services/01234/5678",
   "verbose": true,
   "dryRun": false,
-  "cronStyleSchedule": "00 * * * *",
+  "interval":300,
   "apps": [
     {
       "appId": "com.myandroidapp",
@@ -49,7 +49,8 @@ ReviewMe requires a config file. A simple config looks something like:
 * **botIcon** An image url to use for the bot avatar
 * **showAppIcon** Determines if app icon will be displayed (overrides botIcon)
 * **channel** Overrides the default Slack channel messages will be posted to
-* **cronStyleSchedule** CronJob style schedule to check for new reviews. Default: `00 * * * *`.
+* **interval** The interval (in seconds) to check for new reviews. Default: 300.
+* **cronStyleSchedule** CronJob style schedule to check for new reviews(Can be used instead of interval). Default: `00 * * * *`.
 * **apps** A list of apps to fetch reviews for. See App Options below
 * **publisherKey** *Android Only* The path to a Google Play Publisher private key (`.json` file). Used for accessing the Google Play Publisher API.
 
