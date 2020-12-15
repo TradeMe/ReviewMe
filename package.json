@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node bin/start.js"
+    "start": "node bin/reviewme.js"
   },
   "bin": {
     "reviewme": "bin/reviewme.js"
