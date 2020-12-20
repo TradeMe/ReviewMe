@@ -1,5 +1,5 @@
 const controller = require('./reviews');
-var { google } = require('googleapis');
+var {google} = require('googleapis');
 
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
@@ -8,7 +8,7 @@ exports.startReview = function (config, first_run) {
     var appInformation = {};
 
     //scrape Google Play for app information first
-    playScraper.app({ appId: config.appId })
+    playScraper.app({appId: config.appId})
         .then(function (appData, error) {
             if (error) {
                 return console.error("ERROR: [" + config.appId + "] Could not scrape Google Play, " + error);
