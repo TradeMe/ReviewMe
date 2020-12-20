@@ -8,7 +8,7 @@ module.exports.start = function start(config) {
             slackHook: config.slackHook,
             verbose: config.verbose,
             dryRun: config.dryRun,
-            interval: config.interval,
+            schedule: config.interval || config.cronStyleSchedule,
             botIcon: app.botIcon || config.botIcon,
             showAppIcon: app.showAppIcon || config.showAppIcon,
             channel: app.channel || config.channel,

@@ -37,17 +37,24 @@ exports.startReview = function (config, first_run) {
                     exports.handleFetchedGooglePlayReviews(config, appInformation, reviews);
                 }
 
-                var interval_seconds = config.interval ? config.interval : DEFAULT_INTERVAL_SECONDS;
+                if (!config.schedule) {
+                    config.schedule = DEFAULT_INTERVAL_SECONDS;
+                }
 
-                setInterval(function (config, appInformation) {
+                var fetch = function (config, appInformation) {
                     if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching Google Play reviews");
 
                     exports.fetchGooglePlayReviews(config, appInformation, function (reviews) {
                         exports.handleFetchedGooglePlayReviews(config, appInformation, reviews);
                     });
-                }, interval_seconds * 1000, config, appInformation);
-            });
+                }
 
+                if (typeof config.schedule === 'number') {
+                    setInterval(fetch, config.schedule * 1000, config, appInformation);
+                } else {
+                    schedule.scheduleJob(config.schedule, fetch(config, appInformation));
+                }
+            });
         });
 };
 

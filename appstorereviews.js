@@ -1,6 +1,7 @@
 const controller = require('./reviews');
 const fs = require('fs');
 var request = require('request');
+var schedule = require('node-schedule');
 require('./constants');
 
 exports.startReview = function (config, first_run) {
@@ -16,8 +17,8 @@ exports.startReview = function (config, first_run) {
         config.regions = ["us"];
     }
 
-    if (!config.interval) {
-        config.interval = DEFAULT_INTERVAL_SECONDS
+    if (!config.schedule) {
+        config.schedule = DEFAULT_INTERVAL_SECONDS;
     }
 
     // Find the app information to get a icon URL
@@ -50,15 +51,23 @@ exports.startReview = function (config, first_run) {
                 }
 
                 //calculate the interval with an offset, to avoid spamming the server
-                var interval_seconds = config.interval + (i * 10);
+                var interval_seconds = typeof config.schedule === 'number' ? config.schedule + (i * 10) : i * 10;
 
-                setInterval(function (config, appInformation) {
+                var fetch = function (config, appInformation) {
                     if (config.verbose) console.log("INFO: [" + config.appId + "] Fetching App Store reviews");
 
                     exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
                         exports.handleFetchedAppStoreReviews(config, appInformation, reviews);
                     });
-                }, interval_seconds * 1000, config, appInformation);
+                };
+
+                if (typeof config.schedule === 'number') {
+                    setInterval(fetch, interval_seconds * 1000, config, appInformation);
+                } else {
+                    schedule.scheduleJob(config.schedule, function () {
+                        setTimeout(fetch, interval_seconds * 1000, config, appInformation);
+                    });
+                }
             });
         }
     });
