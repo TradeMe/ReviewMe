@@ -79,10 +79,14 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
 
     //read publisher json key
     var publisherJson;
-    try {
-        publisherJson = JSON.parse(require('fs').readFileSync(config.publisherKey, 'utf8'));
-    } catch (e) {
-        console.warn(e)
+    if (typeof config.publisherKey === 'object') {
+        publisherJson = config.publisherKey;
+    } else {
+        try {
+            publisherJson = JSON.parse(require('fs').readFileSync(config.publisherKey, 'utf8'));
+        } catch (e) {
+            console.warn(e)
+        }
     }
 
     var jwt;
