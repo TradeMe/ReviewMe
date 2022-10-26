@@ -20,14 +20,12 @@ exports.startReview = function (config, first_run) {
         config.interval = DEFAULT_INTERVAL_SECONDS
     }
 
-    // Find the app information to get a icon URL
-    exports.fetchAppInformation(config, function (globalAppInformation) {
-        for (var i = 0; i < config.regions.length; i++) {
-            const region = config.regions[i];
+    for (var i = 0; i < config.regions.length; i++) {
+        const region = config.regions[i];
 
-            const appInformation = Object.assign({},globalAppInformation);
-            appInformation.region = region;
-
+        // Find the app information to get a icon URL
+        exports.fetchAppInformation(config, region, function (globalAppInformation) {
+            const appInformation = Object.assign({}, globalAppInformation);
             exports.fetchAppStoreReviews(config, appInformation, function (reviews) {
                 // If we don't have any published reviews, then treat this as a baseline fetch, we won't post any
                 // reviews to slack, but new ones from now will be posted
@@ -60,8 +58,8 @@ exports.startReview = function (config, first_run) {
                     });
                 }, interval_seconds * 1000, config, appInformation);
             });
-        }
-    });
+        });
+    }
 };
 
 var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback){
@@ -178,12 +176,13 @@ var reviewAppVersion = function (review) {
 };
 
 // App Store app information
-exports.fetchAppInformation = function (config, callback) {
-    const url = "https://itunes.apple.com/lookup?id=" + config.appId;
+exports.fetchAppInformation = function (config, region, callback) {
+    const url = "https://itunes.apple.com/lookup?id=" + config.appId + "&country=" + region;
     const appInformation = {
         appName: config.appName,
         appIcon: config.appIcon,
-        appLink: config.appLink
+        appLink: config.appLink,
+        region, region
     };
     request(url, function (error, response, body) {
         if (error) {
