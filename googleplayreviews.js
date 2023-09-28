@@ -1,4 +1,6 @@
 const controller = require('./reviews');
+const { translateText } = require('./translate');
+
 var {google} = require('googleapis');
 
 var playScraper = require('google-play-scraper');
@@ -156,8 +158,8 @@ var slackMessage = function (review, config, appInformation) {
 
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
-    var text = "";
-    text += review.text + "\n";
+    var text = review.text + "\n";
+    text = translateText(text, 'en');
 
     var footer = "";
     if (review.version) {

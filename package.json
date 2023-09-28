@@ -34,6 +34,7 @@
   "homepage": "https://github.com/TradeMe/ReviewMe#readme",
   "dependencies": {
     "android-versions": "^1.4.0",
+    "axios": "^1.5.1",
     "commander": "^4.1.1",
     "google-play-scraper": "^9.1.1",
     "googleapis": "^52.1.0",

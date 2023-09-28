@@ -246,9 +246,9 @@ var slackMessage = function (review, config, appInformation) {
 
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
-    var text = "";
-    text += review.text + "\n";
-
+    var text = review.text + "\n";
+    text = translateText(text, 'en');
+    
     var footer = "";
     if (review.version) {
         footer += " for v" + review.version;
