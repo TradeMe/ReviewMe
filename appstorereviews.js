@@ -1,4 +1,6 @@
 const controller = require('./reviews');
+const {translateText} = require('./translate');
+
 const fs = require('fs');
 var request = require('request');
 require('./constants');

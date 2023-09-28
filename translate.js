@@ -13,7 +13,7 @@ function detectLanguage(text, callback) {
   });
 }
 
-function translateText(text, to, callback) {
+exports.translateText = function(text, to, callback) {
   detectLanguage(text, (error, from) => {
     if (error) {
       callback(error);
@@ -34,4 +34,3 @@ function translateText(text, to, callback) {
     });
   });
 }
-

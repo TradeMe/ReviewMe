@@ -1,5 +1,5 @@
 const controller = require('./reviews');
-const { translateText } = require('./translate');
+const {translateText} = require('./translate');
 
 var {google} = require('googleapis');
 
@@ -160,7 +160,7 @@ var slackMessage = function (review, config, appInformation) {
 
     var text = "original: " + review.text + "\n";
     text += "translated:" + translateText(text, 'en') + "\n";
-    
+
     var footer = "";
     if (review.version) {
         footer += " for v" + review.version + ' (' + review.versionCode + ') ';
