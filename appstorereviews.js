@@ -96,8 +96,12 @@ var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback
             callback([]);
             return;
         }
-
+        if(!Array.isArray(entries)) {
+            entries = [entries]
+        }
+        
         if (config.verbose) console.log("INFO: Received reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
+
 
         var reviews = entries
           .filter(function (review) {

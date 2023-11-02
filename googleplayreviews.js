@@ -186,10 +186,12 @@ var slackMessage = function (review, translation, config, appInformation) {
         footer += ', ' + review.device
     }
 
+    var appName = appInformation?.appName ?? "unknown"
+    
     if (review.link) {
-        footer += " - " + "<" + review.link + "|" + appInformation.appName + ", " + review.storeName + ">";
+        footer += " - " + "<" + review.link + "|" + appName + ", " + review.storeName + ">";
     } else {
-        footer += " - " + appInformation.appName + ", " + review.storeName;
+        footer += " - " + appName + ", " + review.storeName;
     }
 
     var title = stars;
