@@ -148,7 +148,7 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
     });
 };
 
-var slackMessage = function (review, config, appInformation) {
+var slackMessage = function (review, translation, config, appInformation) {
     if (config.verbose) console.log("INFO: Creating message for review " + review.title);
 
     var stars = "";

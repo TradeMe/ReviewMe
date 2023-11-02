@@ -13,10 +13,10 @@ function detectLanguage(text, callback) {
   });
 }
 
-exports.translateText = function(text, to, callback) {
+exports.translateReview = function(review, config, appInformation, callback) {
   detectLanguage(text, (error, from) => {
     if (error) {
-      callback(error);
+      callback(review, "failed to translate", config, appInformation);
       return;
     }
     
@@ -27,10 +27,11 @@ exports.translateText = function(text, to, callback) {
     })
     .then(response => {
       callback(null, response.data.translatedText);
+      callback(review, response.data.translatedText, config, appInformation);
     })
     .catch(error => {
       console.error('Error translating text:', error);
-      callback(error);
+      callback(review, "failed to translate", config, appInformation);
     });
   });
 }
