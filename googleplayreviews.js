@@ -6,6 +6,8 @@ var {google} = require('googleapis');
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
 
+const DEFAULT_INTERVAL_SECONDS = 300
+
 exports.startReview = function (config, first_run) {
     var appInformation = {};
 
@@ -166,7 +168,10 @@ var slackMessage = function (review, translation, config, appInformation) {
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
     var text = "original: " + review.text + "\n";
-    text += "translated:" + review.translatedText + "\n";
+
+    if (review.translatedText != null) {
+        text += "translated:" + review.translatedText + "\n";
+    }
 
     var footer = "";
     if (review.version) {

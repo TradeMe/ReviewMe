@@ -3,6 +3,8 @@ const appstore = require('./appstorereviews.js');
 const googlePlay = require('./googleplayreviews.js');
 const fs = require('fs');
 
+const REVIEWS_LIMIT = 1000;
+
 const REVIEWS_STORES = {
     "APP_STORE": "app-store",
     "GOOGLE_PLAY": "google-play"
