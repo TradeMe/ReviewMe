@@ -10,6 +10,7 @@ const REVIEWS_STORES = {
 
 var published_reviews;
 try {
+    // @ts-ignore
     published_reviews = JSON.parse(fs.readFileSync('./published_reviews.json'));
 } catch (err) {
     published_reviews = {}

@@ -39,5 +39,8 @@
     "google-play-scraper": "^9.1.1",
     "googleapis": "^52.1.0",
     "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
   }
 }

@@ -142,7 +142,14 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
                 return out;
             });
 
-            callback(reviews);
+            Promise.all(
+                reviews.map(async (review) => {
+                    const translatedText = await translateText(review.text)
+                    return { ...review, translatedText }
+                })
+            ).then((reviews) => {
+                callback(reviews)
+            })
         })
 
     });
@@ -159,7 +166,7 @@ var slackMessage = function (review, translation, config, appInformation) {
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
     var text = "original: " + review.text + "\n";
-    text += "translated:" + translateText(text, 'en') + "\n";
+    text += "translated:" + review.translatedText + "\n";
 
     var footer = "";
     if (review.version) {

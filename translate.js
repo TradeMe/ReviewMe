@@ -1,37 +1,29 @@
 const axios = require('axios');
 
-function detectLanguage(text, callback) {
-  axios.post('https://libretranslate.com/detect', {
-    q: text,
-  })
-  .then(response => {
-    callback(null, response.data[0].language);
-  })
-  .catch(error => {
-    console.error('Error detecting language:', error);
-    callback(error);
-  });
-}
-
-exports.translateReview = function(review, config, appInformation, callback) {
-  detectLanguage(text, (error, from) => {
-    if (error) {
-      callback(review, "failed to translate", config, appInformation);
-      return;
-    }
+exports.translateText = async function(text) {
+    const encodedParams = new URLSearchParams();
+    encodedParams.set('q', text);
     
-    axios.post('https://libretranslate.com/translate', {
-      q: text,
-      source: from,
-      target: to,
-    })
-    .then(response => {
-      callback(null, response.data.translatedText);
-      callback(review, response.data.translatedText, config, appInformation);
-    })
-    .catch(error => {
-      console.error('Error translating text:', error);
-      callback(review, "failed to translate", config, appInformation);
-    });
-  });
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept-Encoding': 'application/gzip',
+        'X-RapidAPI-Key': '261c497befmshbc9f0ccb74eedd0p12977cjsnc632b31922f3',
+        'X-RapidAPI-Host': 'google-translate1.p.rapidapi.com'
+      },
+      body: encodedParams,
+    };
+    
+    try {
+      const response = await fetch('https://google-translate1.p.rapidapi.com/language/translate/v2/detect', options);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();      
+      return data
+    } catch (error) {
+      console.error(error);
+      return null
+    }
 }
