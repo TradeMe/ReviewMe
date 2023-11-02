@@ -1,8 +1,12 @@
 const controller = require('./reviews');
+const {translateText} = require('./translate');
+
 var {google} = require('googleapis');
 
 var playScraper = require('google-play-scraper');
 var androidVersions = require('android-versions')
+
+const DEFAULT_INTERVAL_SECONDS = 300
 
 exports.startReview = function (config, first_run) {
     var appInformation = {};
@@ -140,13 +144,20 @@ exports.fetchGooglePlayReviews = function (config, appInformation, callback) {
                 return out;
             });
 
-            callback(reviews);
+            Promise.all(
+                reviews.map(async (review) => {
+                    const translatedText = await translateText(review.text)
+                    return { ...review, translatedText }
+                })
+            ).then((reviews) => {
+                callback(reviews)
+            })
         })
 
     });
 };
 
-var slackMessage = function (review, config, appInformation) {
+var slackMessage = function (review, translation, config, appInformation) {
     if (config.verbose) console.log("INFO: Creating message for review " + review.title);
 
     var stars = "";
@@ -156,8 +167,11 @@ var slackMessage = function (review, config, appInformation) {
 
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
-    var text = "";
-    text += review.text + "\n";
+    var text = "original: " + review.text + "\n";
+
+    if (review.translatedText != null) {
+        text += "translated:" + review.translatedText + "\n";
+    }
 
     var footer = "";
     if (review.version) {
@@ -172,10 +186,12 @@ var slackMessage = function (review, config, appInformation) {
         footer += ', ' + review.device
     }
 
+    var appName = appInformation?.appName ?? "unknown"
+    
     if (review.link) {
-        footer += " - " + "<" + review.link + "|" + appInformation.appName + ", " + review.storeName + ">";
+        footer += " - " + "<" + review.link + "|" + appName + ", " + review.storeName + ">";
     } else {
-        footer += " - " + appInformation.appName + ", " + review.storeName;
+        footer += " - " + appName + ", " + review.storeName;
     }
 
     var title = stars;

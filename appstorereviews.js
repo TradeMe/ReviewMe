@@ -1,13 +1,16 @@
 const controller = require('./reviews');
+const {translateText} = require('./translate');
+
 const fs = require('fs');
 var request = require('request');
-require('./constants');
+
+const DEFAULT_INTERVAL_SECONDS = 300
 
 exports.startReview = function (config, first_run) {
 
     if (config.regions === false){
         try {
-            config.regions = JSON.parse(fs.readFileSync(__dirname  + '/regions.json'));
+            config.regions = JSON.parse(fs.readFileSync(__dirname  + '/regions.json', 'utf8'));
         } catch (err) {
             config.regions = ["us"];
         }
@@ -88,13 +91,17 @@ var fetchAppStoreReviewsByPage = function(config, appInformation, page, callback
 
         var entries = rss.feed.entry;
 
-        if (entries == null || !entries.length > 0) {
+        if (entries == null || entries.length <= 0) {
             if (config.verbose) console.log("INFO: Received no reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
             callback([]);
             return;
         }
-
+        if(!Array.isArray(entries)) {
+            entries = [entries]
+        }
+        
         if (config.verbose) console.log("INFO: Received reviews from App Store for (" + config.appId + ") (" + appInformation.region + ")");
+
 
         var reviews = entries
           .filter(function (review) {
@@ -182,7 +189,7 @@ exports.fetchAppInformation = function (config, region, callback) {
         appName: config.appName,
         appIcon: config.appIcon,
         appLink: config.appLink,
-        region, region
+        region: region
     };
     request(url, function (error, response, body) {
         if (error) {
@@ -207,7 +214,7 @@ exports.fetchAppInformation = function (config, region, callback) {
 
         var entries = data.results;
 
-        if (entries == null || !entries.length > 0) {
+        if (entries == null || entries.length <= 0) {
             if (config.verbose) console.log("INFO: Received no data from App Store for (" + config.appId + ")");
             callback(appInformation);
             return;
@@ -246,8 +253,11 @@ var slackMessage = function (review, config, appInformation) {
 
     var color = review.rating >= 4 ? "good" : (review.rating >= 2 ? "warning" : "danger");
 
-    var text = "";
-    text += review.text + "\n";
+    var text = "original: " + review.text + "\n";
+    
+    if (review.translatedText != null) {
+        text += "translated:" + review.translatedText + "\n";
+    }
 
     var footer = "";
     if (review.version) {

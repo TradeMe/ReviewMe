@@ -174,3 +174,6 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/osx,node,windows,intellij
 
 .idea
+*appconfig.json
+play.json
+published_reviews.json
